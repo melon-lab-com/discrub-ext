@@ -10,7 +10,9 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import debounce from "debounce";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import EditIcon from "@mui/icons-material/Edit";
+import DownloadIcon from "@mui/icons-material/Download";
 import { Button } from "@mui/material";
+import Message from "../../classes/message";
 import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
@@ -24,6 +26,25 @@ import { useThreadSlice } from "../../features/thread/use-thread-slice";
 import ExportButton from "../export-button/export-button";
 import FilterModal from "./components/filter-modal";
 import { useExportSlice } from "../../features/export/use-export-slice.ts";
+
+const formatMessagesToText = (messages: Message[]): string =>
+  messages
+    .map((m) => {
+      const date = new Date(m.timestamp).toLocaleString();
+      const username = m.userName ?? m.author.username;
+      return `[${date}] ${username}: ${m.content}`;
+    })
+    .join("\n");
+
+const downloadAsTxt = (content: string, filename: string): void => {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+};
 
 type MessageTableToolbarProps = {
   selectedRows: string[];
@@ -55,6 +76,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     filterMessages,
   } = useMessageSlice();
   const messages = messageState.messages();
+  const filteredMessages = messageState.filteredMessages();
   const filters = messageState.filters();
 
   const { state: threadState } = useThreadSlice();
@@ -106,6 +128,12 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   const handleFilterUpdate = (filter: Filter) => {
     updateFilters(filter);
     handleFilterMessages();
+  };
+
+  const handleQuickExportTxt = () => {
+    const visibleMessages = filters.length ? filteredMessages : messages;
+    const text = formatMessagesToText(visibleMessages);
+    downloadAsTxt(text, "messages.txt");
   };
 
   const zeroSelections = selectedRows.length === 0;
@@ -165,11 +193,21 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
             >
               {`Quick Filtering${filters.length ? " (Active)" : ""}`}
             </Button>
-            <ExportButton
-              disabled={discrubCancelled}
-              bulk={false}
-              isDm={isDm}
-            />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                disabled={discrubCancelled || messages.length === 0}
+                onClick={handleQuickExportTxt}
+              >
+                Quick Export TXT
+              </Button>
+              <ExportButton
+                disabled={discrubCancelled}
+                bulk={false}
+                isDm={isDm}
+              />
+            </Stack>
           </Stack>
           <FilterModal
             open={filterOpen}
