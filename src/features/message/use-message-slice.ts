@@ -101,7 +101,7 @@ const useMessageSlice = () => {
   };
 
   const filterMessages = () => {
-    dispatch(filterMessagesAction());
+    return dispatch(filterMessagesAction());
   };
 
   const updateMessage = (message: Message) => {

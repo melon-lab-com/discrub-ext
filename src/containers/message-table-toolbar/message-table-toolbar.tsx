@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -33,7 +33,9 @@ const downloadAsTxt = (content: string, filename: string): void => {
   anchor.href = url;
   anchor.download = filename;
   anchor.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 100);
 };
 
 type MessageTableToolbarProps = {
@@ -62,24 +64,32 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   const threads = threadState.threads();
 
   const [filterOpen, setFilterOpen] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   const handleFilterToggle = () => {
     setFilterOpen(!filterOpen);
   };
 
-  const handleFilterMessages = debounce(() => {
-    filterMessages();
-  }, 600);
+  const handleFilterMessages = useMemo(
+    () =>
+      debounce(() => {
+        filterMessages();
+        setIsFiltering(false);
+      }, 600),
+    [filterMessages],
+  );
 
   const handleFilterUpdate = (filter: Filter) => {
+    setIsFiltering(true);
     updateFilters(filter);
     handleFilterMessages();
   };
 
-  const handleQuickExportTxt = () => {
-    const visibleMessages = filters.length ? filteredMessages : messages;
+  const handleQuickExportTxt = async () => {
+    const freshFilteredMessages = await filterMessages();
+    const visibleMessages = filters.length ? freshFilteredMessages : messages;
     const text = formatMessagesToText(visibleMessages);
-    downloadAsTxt(text, "messages.txt");
+    downloadAsTxt(text, `messages-${Date.now()}.txt`);
   };
 
   const zeroSelections = selectedRows.length === 0;
@@ -127,13 +137,19 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
               <Button
                 variant="outlined"
                 startIcon={<DownloadIcon />}
-                disabled={discrubCancelled || messages.length === 0}
+                disabled={
+                  discrubCancelled ||
+                  isFiltering ||
+                  (filters.length > 0
+                    ? filteredMessages.length === 0
+                    : messages.length === 0)
+                }
                 onClick={handleQuickExportTxt}
               >
                 Quick Export TXT
               </Button>
               <ExportButton
-                disabled={discrubCancelled}
+                disabled={discrubCancelled || isFiltering}
                 bulk={false}
                 isDm={isDm}
               />

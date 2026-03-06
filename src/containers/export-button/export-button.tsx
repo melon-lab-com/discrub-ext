@@ -90,7 +90,7 @@ const ExportButton = ({
   const { state: dmState } = useDmSlice();
   const selectedDms = dmState.selectedDms();
 
-  const { state: messageState } = useMessageSlice();
+  const { state: messageState, filterMessages } = useMessageSlice();
   const messages = messageState.messages();
   const filteredMessages = messageState.filteredMessages();
   const filters = messageState.filters();
@@ -147,7 +147,8 @@ const ExportButton = ({
       }
     } else {
       const entity = isDm ? selectedDms[0] : selectedChannel || selectedGuild;
-      const messagesToExport = filters.length ? filteredMessages : messages;
+      const freshFilteredMessages = await filterMessages();
+      const messagesToExport = filters.length ? freshFilteredMessages : messages;
       if (entity && messagesToExport.length) {
         exportMessages(
           messagesToExport,
