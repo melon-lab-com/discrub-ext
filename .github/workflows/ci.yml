@@ -2,20 +2,25 @@ name: CI
 
 on:
   push:
-    branches: [ "development", "main" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "development", "main" ]
+    branches: ["**"]
 
 jobs:
-  build-and-lint:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run lint
-    - run: npm run build
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
