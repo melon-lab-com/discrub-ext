@@ -16,7 +16,6 @@ import {
   Typography,
 } from "@mui/material";
 import ExportButton from "../export-button/export-button";
-import PurgeButton from "../purge-button/purge-button";
 import TokenNotFound from "../../components/token-not-found";
 import { getIconUrl, sortByProperty } from "../../utils";
 import PauseButton from "../../components/pause-button";
@@ -56,9 +55,7 @@ function DirectMessages() {
     state: messageState,
     getMessageData,
     setOrder,
-    deleteAttachment,
     setSelected,
-    deleteReaction,
     resetAdvancedFilters,
   } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
@@ -164,7 +161,7 @@ function DirectMessages() {
   const searchDisabled =
     selectedDms.length !== 1 || messagesLoading || discrubCancelled;
   const pauseCancelDisabled = !messagesLoading;
-  const exportAndPurgeDisabled =
+  const exportDisabled =
     selectedDms.length === 0 ||
     messagesLoading ||
     messages.length > 0 ||
@@ -189,11 +186,9 @@ function DirectMessages() {
         task={task}
         handleClose={() => setReactionModalOpen(false)}
         open={reactionModalOpen}
-        handleReactionDelete={deleteReaction}
       />
       <AttachmentModal
         task={task}
-        onDeleteAttachment={deleteAttachment}
         handleClose={() => setAttachmentModalOpen(false)}
         open={attachmentModalOpen}
       />
@@ -280,8 +275,7 @@ function DirectMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <ExportButton bulk disabled={exportAndPurgeDisabled} isDm />
-                <PurgeButton disabled={exportAndPurgeDisabled} isDm />
+                <ExportButton bulk disabled={exportDisabled} isDm />
                 <PauseButton disabled={pauseCancelDisabled} />
                 <Button
                   disabled={searchDisabled}

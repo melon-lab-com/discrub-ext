@@ -24,20 +24,12 @@ type ReactionModalProps = {
   task: AppTask;
   open: boolean;
   handleClose: () => void;
-  handleReactionDelete: (
-    channelId: Snowflake,
-    messageId: Snowflake,
-    emoji: string,
-    userId: string,
-    withTask: boolean,
-  ) => void;
 };
 
 const ReactionModal = ({
   task,
   open,
   handleClose,
-  handleReactionDelete,
 }: ReactionModalProps) => {
   const { state: exportState } = useExportSlice();
   const userMap = exportState.userMap();
@@ -98,16 +90,6 @@ const ReactionModal = ({
                       key={getEncodedEmoji(r.emoji)}
                       emoji={r.emoji}
                       reactingUsers={reactingUsers}
-                      disabled={active}
-                      onReactionDelete={(e) =>
-                        handleReactionDelete(
-                          entity.channel_id,
-                          entity.id,
-                          encodedEmoji,
-                          e,
-                          true,
-                        )
-                      }
                     />
                   ) : null;
                 })}
@@ -125,7 +107,6 @@ const ReactionModal = ({
         >
           {active && <LinearProgress sx={{ width: "100%", m: 1 }} />}
           <Button
-            disabled={active}
             variant="contained"
             onClick={handleClose}
             color="secondary"
