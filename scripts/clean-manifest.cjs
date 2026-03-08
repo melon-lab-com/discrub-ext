@@ -4,6 +4,12 @@ const fs = require("fs");
 const path = require("path");
 
 const manifestPath = path.resolve(__dirname, "../dist/manifest.json");
+
+if (!fs.existsSync(manifestPath)) {
+  console.warn("clean-manifest: dist/manifest.json not found, skipping.");
+  process.exit(0);
+}
+
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
 delete manifest.use_dynamic_url;
