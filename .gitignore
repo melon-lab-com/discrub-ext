@@ -22,3 +22,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Playwright
+/tests/
+/playwright.config.ts
+/extract-state.cjs
+/playwright-report/
+/test-results/
