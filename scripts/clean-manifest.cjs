@@ -4,6 +4,12 @@ const fs = require("fs");
 const path = require("path");
 
 const manifestPath = path.resolve(__dirname, "../dist/manifest.json");
+
+if (!fs.existsSync(manifestPath)) {
+  console.error(`[clean-manifest] dist/manifest.json not found at ${manifestPath}. Did 'vite build' succeed?`);
+  process.exit(1);
+}
+
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
 delete manifest.use_dynamic_url;

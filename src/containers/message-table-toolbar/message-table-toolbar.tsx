@@ -22,7 +22,8 @@ const formatMessagesToText = (messages: Message[]): string =>
     .map((m) => {
       const date = new Date(m.timestamp).toLocaleString();
       const username = m.userName ?? m.author.username;
-      return `[${date}] ${username}: ${m.content}`;
+      const content = m.content.replace(/\r?\n/g, " ");
+      return `[${date}] ${username}: ${content}`;
     })
     .join("\n");
 
@@ -32,10 +33,12 @@ const downloadAsTxt = (content: string, filename: string): void => {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
+  document.body.appendChild(anchor);
   anchor.click();
+  document.body.removeChild(anchor);
   setTimeout(() => {
     URL.revokeObjectURL(url);
-  }, 100);
+  }, 1000);
 };
 
 type MessageTableToolbarProps = {
@@ -72,9 +75,12 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
 
   const handleFilterMessages = useMemo(
     () =>
-      debounce(() => {
-        filterMessages();
-        setIsFiltering(false);
+      debounce(async () => {
+        try {
+          await filterMessages();
+        } finally {
+          setIsFiltering(false);
+        }
       }, 600),
     [filterMessages],
   );
@@ -85,9 +91,8 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     handleFilterMessages();
   };
 
-  const handleQuickExportTxt = async () => {
-    const freshFilteredMessages = await filterMessages();
-    const visibleMessages = filters.length ? freshFilteredMessages : messages;
+  const handleQuickExportTxt = () => {
+    const visibleMessages = filters.length ? filteredMessages : messages;
     const text = formatMessagesToText(visibleMessages);
     downloadAsTxt(text, `messages-${Date.now()}.txt`);
   };

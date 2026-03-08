@@ -1040,7 +1040,7 @@ const _generateReactionMap =
       if (await dispatch(isAppStopped())) break;
 
       if (message.reactions?.length && token) {
-        for (const [_i, reaction] of message.reactions.entries()) {
+        for (const [, reaction] of message.reactions.entries()) {
           const { emoji } = reaction;
           const encodedEmoji = getEncodedEmoji(emoji);
           const brackets = emoji.id ? ":" : "";
@@ -1127,7 +1127,7 @@ export const getMessageData =
     channelId: string | null,
     options: Partial<MessageSearchOptions> = {},
   ): AppThunk<Promise<MessageData & Partial<SearchResultData>>> =>
-  async (dispatch, _getState) => {
+  async (dispatch) => {
     dispatch(resetMessageData());
     dispatch(setIsLoading(true));
 
@@ -1212,7 +1212,7 @@ const _collectUserNames =
 
     if (token && stringToBool(displayNameLookup)) {
       const userIds = Object.keys(updateMap);
-      for (const [_i, userId] of userIds.entries()) {
+      for (const [, userId] of userIds.entries()) {
         if (await dispatch(isAppStopped())) break;
         const mapping = existingUserMap[userId] || updateMap[userId];
         const { userName, displayName, timestamp } = mapping;
@@ -1255,7 +1255,7 @@ const _collectUserGuildData =
 
     if (token && stringToBool(serverNickNameLookup)) {
       const userIds = Object.keys(updateMap);
-      for (const [_i, userId] of userIds.entries()) {
+      for (const [, userId] of userIds.entries()) {
         if (await dispatch(isAppStopped())) break;
         const userMapping = existingUserMap[userId] || updateMap[userId];
         const userGuilds = userMapping.guilds;
@@ -1442,7 +1442,8 @@ const _getSearchMessages =
         ).fetchSearchMessageData(token, offset, channelId, guildId, criteria);
 
         if (success && data) {
-          let { total_results, messages = [], threads = [] } = data;
+          const { total_results, threads = [] } = data;
+          let { messages = [] } = data;
           const isResultsFound = !!total_results || messages.length > 0;
 
           // Ensure totalMessages is up-to-date so that _getSearchData can assign the correct offset
