@@ -25,6 +25,7 @@ type PurgeModalProps = {
 
 export type PurgedMessage = { message: Message };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export enum PurgeInstruction {
   AWAITING_INSTRUCTION = "Awaiting Instruction",
   PURGING = "Purging",
@@ -100,7 +101,7 @@ const PurgeModal = ({
           : prevState,
       );
     }
-  }, [task]);
+  }, [task, active, entity]);
 
   const criteriaTab: EnhancedTab = {
     label: "Criteria",

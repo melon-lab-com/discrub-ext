@@ -37,6 +37,7 @@ type BulkContentProps = {
   loadChannel: (e: string) => void;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getExportSettings = (
   visibleSettings: DiscrubSetting[],
   isDm: boolean,

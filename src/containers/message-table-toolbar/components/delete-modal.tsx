@@ -55,6 +55,14 @@ type DeleteModalProps = {
   userMap: ExportUserMap;
 };
 
+const defaultConfig: DeleteConfiguration = {
+  attachments: true,
+  messages: true,
+  reactions: false,
+  reactingUserIds: [],
+  emojis: [],
+};
+
 const DeleteModal = ({
   open,
   handleClose,
@@ -67,13 +75,6 @@ const DeleteModal = ({
 }: DeleteModalProps) => {
   const theme = useTheme();
   const { active, entity, statusText } = task;
-  const defaultConfig: DeleteConfiguration = {
-    attachments: true,
-    messages: true,
-    reactions: false,
-    reactingUserIds: [],
-    emojis: [],
-  };
 
   const filteredMessages = messages.filter((m) =>
     selectedRows.some((id) => id === m.id),

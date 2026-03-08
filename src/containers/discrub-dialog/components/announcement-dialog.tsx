@@ -30,7 +30,6 @@ const AnnouncementDialog = ({ handleClose, open }: AnnouncementDialogProps) => {
       getMarkdownData();
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
   return (
     <Dialog

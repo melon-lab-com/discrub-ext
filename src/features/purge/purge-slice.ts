@@ -69,7 +69,7 @@ export const purge =
       const channelId = isGuild(entity) ? null : entity.id;
 
       let isResetPurge = false;
-      let skipThreadIds: string[] = [];
+      const skipThreadIds: string[] = [];
       const trackedMessageIds: string[] = [];
       let trackedTotalMessages = payload.totalMessages;
 
@@ -159,7 +159,7 @@ export const _purgeMessages =
         liftThreadRestrictions(message.channel_id, skipThreadIds, threads),
       );
 
-      let modifyEntity = Object.assign(new Message({ ...message }), {
+      const modifyEntity = Object.assign(new Message({ ...message }), {
         _index: index + 1,
         _total: Number(totalMessages) - index,
         _status: PurgeStatus.IN_PROGRESS,
@@ -231,7 +231,7 @@ export const _removeMessageReactions =
 
     // Result of reaction removal for the provided message
     let status = PurgeStatus.NO_REACTIONS_FOUND;
-    if (!!total) {
+    if (total) {
       if (succeeded === total) {
         status = PurgeStatus.REACTIONS_REMOVED;
       } else if (!!succeeded && succeeded < total) {
@@ -255,7 +255,7 @@ export const _retainAttachmentMessage =
     message: Message,
     modifyEntity: Message & AppTaskStatus,
   ): AppThunk<Promise<void>> =>
-  async (dispatch, _getState) => {
+  async (dispatch) => {
     if (message.content.length) {
       const { success } = await dispatch(
         updateRawMessage(Object.assign(message, { content: "" })),

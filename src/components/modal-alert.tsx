@@ -9,7 +9,7 @@ const ModalAlert = ({
 }) => {
   return (
     <Snackbar
-      sx={{ opacity: !!debugMessage ? 1 : 0 }}
+      sx={{ opacity: debugMessage ? 1 : 0 }}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       autoHideDuration={2000}
       open={!!debugMessage}

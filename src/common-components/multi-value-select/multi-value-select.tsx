@@ -52,7 +52,7 @@ const MultiValueSelect = ({
     </MenuItem>
   );
 
-  const elements: ReactNode[] = !!(categoryMap && categories?.length)
+  const elements: ReactNode[] = (categoryMap && categories?.length)
     ? categories.reduce((acc: ReactNode[], curr) => {
         return [
           ...acc,
