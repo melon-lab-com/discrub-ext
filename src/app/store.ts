@@ -6,7 +6,6 @@ import threadReducer from "../features/thread/thread-slice";
 import dmReducer from "../features/dm/dm-slice";
 import guildReducer from "../features/guild/guild-slice";
 import relationshipReducer from "../features/relationship/relationship-slice";
-import purgeReducer from "../features/purge/purge-slice";
 import exportReducer from "../features/export/export-slice";
 import messageReducer from "../features/message/message-slice";
 
@@ -18,7 +17,6 @@ export const store = configureStore({
     export: exportReducer,
     guild: guildReducer,
     message: messageReducer,
-    purge: purgeReducer,
     relationship: relationshipReducer,
     thread: threadReducer,
     user: userReducer,

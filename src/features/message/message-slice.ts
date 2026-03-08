@@ -428,7 +428,7 @@ export const {
 } = messageSlice.actions;
 
 export const filterMessages =
-  (): AppThunk<Promise<void>> => async (dispatch, getState) => {
+  (): AppThunk<Promise<Message[]>> => async (dispatch, getState) => {
     const state = getState().message;
     let retArr: Message[] = [];
     const inverseActive = state.filters
@@ -506,6 +506,7 @@ export const filterMessages =
           .map((m) => m.id),
       ),
     );
+    return retArr;
   };
 
 /**

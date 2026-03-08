@@ -10,25 +10,18 @@ import {
   resetAdvancedFilters as resetAdvancedFiltersAction,
   updateFilters as updateFiltersAction,
   filterMessages as filterMessagesAction,
-  deleteAttachment as deleteAttachmentAction,
   updateMessage as updateMessageAction,
-  editMessages as editMessagesAction,
-  deleteMessage as deleteMessageAction,
-  deleteMessages as deleteMessagesAction,
   getMessageData as getMessageDataAction,
   resetMessageData as resetMessageDataAction,
-  deleteReaction as deleteReactionAction,
 } from "./message-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  DeleteConfiguration,
   Filter,
   MessageSearchOptions,
   SearchCriteria,
 } from "./message-types";
 import { SortDirection } from "../../enum/sort-direction";
 import Message from "../../classes/message";
-import Attachment from "../../classes/attachment";
 
 const useMessageSlice = () => {
   const dispatch = useAppDispatch();
@@ -108,42 +101,11 @@ const useMessageSlice = () => {
   };
 
   const filterMessages = () => {
-    dispatch(filterMessagesAction());
-  };
-
-  const deleteAttachment = (attachment: Attachment) => {
-    dispatch(deleteAttachmentAction(attachment));
+    return dispatch(filterMessagesAction());
   };
 
   const updateMessage = (message: Message) => {
     dispatch(updateMessageAction(message));
-  };
-
-  const editMessages = (messages: Message[], text: string) => {
-    dispatch(editMessagesAction(messages, text));
-  };
-
-  const deleteMessage = (message: Message) => {
-    dispatch(deleteMessageAction(message));
-  };
-
-  const deleteReaction = (
-    channelId: Snowflake,
-    messageId: Snowflake,
-    emoji: string,
-    userId: string,
-    withTask?: boolean,
-  ) => {
-    dispatch(
-      deleteReactionAction(channelId, messageId, emoji, userId, withTask),
-    );
-  };
-
-  const deleteMessages = (
-    messages: Message[],
-    deleteConfig?: DeleteConfiguration,
-  ) => {
-    dispatch(deleteMessagesAction(messages, deleteConfig));
   };
 
   const getMessageData = (
@@ -170,14 +132,9 @@ const useMessageSlice = () => {
     resetAdvancedFilters,
     updateFilters,
     filterMessages,
-    deleteAttachment,
     updateMessage,
-    editMessages,
-    deleteMessage,
-    deleteMessages,
     getMessageData,
     resetMessageData,
-    deleteReaction,
   };
 };
 

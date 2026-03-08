@@ -15,7 +15,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
 import TokenNotFound from "../../components/token-not-found";
 import {
@@ -66,9 +65,7 @@ function ChannelMessages() {
     state: messageState,
     getMessageData,
     setOrder,
-    deleteAttachment,
     setSelected,
-    deleteReaction,
   } = useMessageSlice();
   const messages = messageState.messages();
   const messagesLoading = messageState.isLoading();
@@ -156,13 +153,6 @@ function ChannelMessages() {
     messagesLoading ||
     (!isCriteriaActive(searchCriteria) && !selectedChannel?.id) ||
     discrubCancelled;
-  const purgeDisabled = Boolean(
-    !selectedGuild?.id ||
-      messagesLoading ||
-      selectedChannel?.id ||
-      messages.length > 0 ||
-      discrubCancelled,
-  );
   const exportDisabled = Boolean(
     !selectedGuild?.id ||
       messagesLoading ||
@@ -193,11 +183,9 @@ function ChannelMessages() {
         task={task}
         handleClose={() => setReactionModalOpen(false)}
         open={reactionModalOpen}
-        handleReactionDelete={deleteReaction}
       />
       <AttachmentModal
         task={task}
-        onDeleteAttachment={deleteAttachment}
         handleClose={() => setAttachmentModalOpen(false)}
         open={attachmentModalOpen}
       />
@@ -308,7 +296,6 @@ function ChannelMessages() {
                 justifyContent="flex-end"
               >
                 <ExportButton bulk disabled={exportDisabled} />
-                <PurgeButton disabled={purgeDisabled} />
                 <PauseButton disabled={pauseCancelDisabled} />
                 <Button
                   disabled={searchBtnDisabled}

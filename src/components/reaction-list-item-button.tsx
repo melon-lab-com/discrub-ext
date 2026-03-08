@@ -9,7 +9,6 @@ import {
   Alert,
   useTheme,
   Box,
-  IconButton,
 } from "@mui/material";
 import { Emoji } from "../classes/emoji";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -18,7 +17,6 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import { resolveAvatarUrl, resolveEmojiUrl } from "../utils";
 import copy from "copy-to-clipboard";
 import Tooltip from "../common-components/tooltip/tooltip";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import ServerEmoji from "./server-emoji";
 
@@ -33,15 +31,11 @@ export type ReactingUser = {
 type ReactionListItemButtonProps = {
   emoji: Emoji;
   reactingUsers: ReactingUser[];
-  disabled: boolean;
-  onReactionDelete: (userId: string) => void;
 };
 
 const ReactionListItemButton = ({
   emoji,
   reactingUsers,
-  disabled,
-  onReactionDelete,
 }: ReactionListItemButtonProps) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
@@ -92,16 +86,6 @@ const ReactionListItemButton = ({
               <VerifiedIcon sx={{ color: theme.palette.secondary.main }} />
             </Tooltip>
           )}
-          {
-            <Tooltip title="Delete Reaction">
-              <IconButton
-                disabled={disabled}
-                onClick={() => onReactionDelete(rUser.id)}
-              >
-                <DeleteForeverIcon color="error" />
-              </IconButton>
-            </Tooltip>
-          }
         </Box>
       </ListItem>
     );

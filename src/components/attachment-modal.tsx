@@ -10,7 +10,6 @@ import {
   DialogContent,
   Avatar,
   Box,
-  IconButton,
   useTheme,
   LinearProgress,
   AlertColor,
@@ -19,7 +18,6 @@ import { AppTask } from "../features/app/app-types";
 import Attachment from "../classes/attachment";
 import { isMessage } from "../app/guards";
 import Tooltip from "../common-components/tooltip/tooltip";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { entityIsImage } from "../utils";
 import {
   ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
@@ -30,21 +28,15 @@ type AttachmentModalProps = {
   task: AppTask;
   open: boolean;
   handleClose: () => void;
-  onDeleteAttachment: (attachment: Attachment) => void;
 };
 
 const AttachmentModal = ({
   task,
   open,
   handleClose,
-  onDeleteAttachment,
 }: AttachmentModalProps) => {
   const theme = useTheme();
   const { entity, active, statusText } = task || {};
-
-  const handleDeleteAttachment = async (attachment: Attachment) => {
-    onDeleteAttachment(attachment);
-  };
 
   useEffect(() => {
     if (!entity || (isMessage(entity) && entity.attachments.length === 0)) {
@@ -114,14 +106,6 @@ const AttachmentModal = ({
             </Box>
           </Tooltip>
         </Stack>
-        <Tooltip title="Delete">
-          <IconButton
-            disabled={active}
-            onClick={() => handleDeleteAttachment(attachment)}
-          >
-            <DeleteForeverIcon color="error" />
-          </IconButton>
-        </Tooltip>
       </Stack>
     );
   };
@@ -138,10 +122,7 @@ const AttachmentModal = ({
   return (
     <Dialog hideBackdrop fullWidth open={open} onClose={handleClose}>
       <DialogTitle>
-        <Typography variant="h5">Delete Attachments</Typography>
-        <Typography variant="caption">
-          Proceed with caution, this is permanent!
-        </Typography>
+        <Typography variant="h5">Attachments</Typography>
       </DialogTitle>
       <DialogContent sx={{ height: "300px", overflow: "hidden !important" }}>
         <Stack
