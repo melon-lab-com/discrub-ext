@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import SearchCriteriaButton from "./components/search-criteria-button.tsx";
 import SearchCriteriaForm from "./components/search-criteria-form.tsx";
 

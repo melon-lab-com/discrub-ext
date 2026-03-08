@@ -53,7 +53,7 @@ function DonationComponent({
           </List>
         ) : (
           <>
-            {Array.from(Array(9)).map((_) => (
+            {Array.from(Array(9)).map(() => (
               <Skeleton
                 animation="wave"
                 sx={{ mt: 1 }}

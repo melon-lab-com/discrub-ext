@@ -239,8 +239,8 @@ const _downloadFilesFromMessage =
       (mt) => mt === MediaType.EMBEDDED_VIDEOS,
     );
 
-    let embeds = message.embeds;
-    let attachments = message.attachments;
+    const embeds = message.embeds;
+    const attachments = message.attachments;
 
     let mediaPath = paths.media;
     if (folderingThreads) {
@@ -310,7 +310,7 @@ const _downloadRoles =
   (exportUtils: ExportUtils, guild: Guild): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const guildRoles = guild.roles || [];
-    for (const [_, role] of guildRoles.entries()) {
+    for (const [, role] of guildRoles.entries()) {
       const { settings } = getState().app;
       if (await dispatch(isAppStopped())) break;
 
@@ -362,7 +362,7 @@ const _downloadAvatarFromMessage =
       });
     }
 
-    for (const [_, aL] of avatarLookups.entries()) {
+    for (const [, aL] of avatarLookups.entries()) {
       const { settings } = getState().app;
       if (await dispatch(isAppStopped())) break;
 
@@ -821,7 +821,7 @@ const _processMessages =
     paths,
     exportUtils,
   }: ProcessMessagesProps): AppThunk<Promise<void>> =>
-  async (dispatch, _getState) => {
+  async (dispatch) => {
     for (const [i, message] of messages.entries()) {
       await wait(!i ? 3 : 0);
       if (await dispatch(isAppStopped())) break;
@@ -901,8 +901,8 @@ const _exportCsv = async ({
   filePath,
 }: ExportHtmlProps) => {
   const csvKeys: string[] = [];
-  const csvData: Object[] = messages.map((m) => {
-    const flattenedMessage: Object = flatten(m);
+  const csvData: object[] = messages.map((m) => {
+    const flattenedMessage: object = flatten(m);
     Object.keys(flattenedMessage).forEach((mKey) => {
       if (!csvKeys.some((csvKey) => csvKey === mKey)) {
         csvKeys.push(mKey);
@@ -945,7 +945,7 @@ const _compressMessages =
       adjustedMessages = messages.filter(
         (m) => !m.thread && !threads.some((t) => t.id === m.channel_id),
       );
-      for (let [i, t] of threads.entries()) {
+      for (const [i, t] of threads.entries()) {
         const threadNumber = i + 1;
         const threadMessages = messages.filter(
           (m) => m.thread?.id === t.id || m.channel_id === t.id,
@@ -1040,7 +1040,7 @@ export const exportMessages =
     const { selectedChannel } = getState().channel;
     const { selectedDms } = getState().dm;
 
-    const entity = !!selectedDms.length
+    const entity = selectedDms.length
       ? selectedDms[0]
       : selectedChannel || selectedGuild;
     const safeEntityName = getOsSafeString(entityName);

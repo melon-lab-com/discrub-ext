@@ -87,7 +87,7 @@ export const getPercent = (index: number, total: number): string => {
  * @param arr
  * @returns The joined strings properly punctuated
  */
-export const punctuateStringArr = (arr: String[]) => {
+export const punctuateStringArr = (arr: string[]) => {
   let str = "";
   arr.forEach((s) => {
     str = `${str}${
