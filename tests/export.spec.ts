@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 
 // Required env vars for integration tests:
 //   DISCORD_TOKEN    - Discord user token for authentication
-//   TEST_CHANNEL_ID  - ID of the Discord channel to test against
+//   TEST_CHANNEL_ID  - ID of the Discord DM channel to test against
 //
 // Local development: place these in ~/.openclaw/.env
 // CI: set them as repository secrets and expose via env: in the workflow
@@ -53,8 +53,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 test('Discrub extension - Quick Export TXT end-to-end', async () => {
-  test.setTimeout(120000);
+  test.setTimeout(180000);
   const extensionPath = path.resolve(__dirname, '../dist');
+  const channelId = process.env.TEST_CHANNEL_ID!;
 
   const userDataDir = path.resolve(os.tmpdir(), 'test-user-data-dir');
   const context = await chromium.launchPersistentContext(userDataDir, {
@@ -65,18 +66,17 @@ test('Discrub extension - Quick Export TXT end-to-end', async () => {
     ],
   });
 
-  // Inject state manually
+  // Inject Discord session state
   const stateStr = fs.readFileSync(DISCORD_STATE_PATH, 'utf8');
   const state = JSON.parse(stateStr);
-  
+
   await context.addCookies(state.cookies);
 
   const page = context.pages()[0] || await context.newPage();
 
-  // Navigate to discord.com first to set local storage
-  await page.goto('https://discord.com');
+  // Navigate to discord.com first to set localStorage
+  await page.goto('https://discord.com/robots.txt');
 
-  // Inject origins storage
   await page.evaluate((origins) => {
     origins.forEach(origin => {
       if (origin.origin.includes('discord.com')) {
@@ -87,43 +87,82 @@ test('Discrub extension - Quick Export TXT end-to-end', async () => {
     });
   }, state.origins);
 
-  // Navigate to app directly
-  await page.goto('https://discord.com/app');
+  // Navigate directly to the test DM channel
+  await page.goto(`https://discord.com/channels/@me/${channelId}`);
 
-  // Wait for app to load
+  // Wait for Discord app to finish loading
   await page.waitForSelector('[aria-label="Friends"], [aria-label="Inbox"]', { timeout: 30000 });
-  await page.waitForTimeout(5000);
-
-  // Click a DM channel
-  const dmLinks = page.locator('a[href^="/channels/@me/"]').first();
-  if (await dmLinks.isVisible()) {
-      await dmLinks.click();
-  }
-  
   await page.waitForTimeout(3000);
 
-  const iframeElement = page.locator('#injected_iframe_button');
-  await expect(iframeElement).toBeVisible({ timeout: 15000 });
-  
-  const frame = await iframeElement.elementHandle();
-  const frameContent = await frame?.contentFrame();
-  
-  if (frameContent) {
-     await frameContent.click('button'); 
+  // Click the Discrub extension button (inside the injected button iframe)
+  const buttonFrame = page.frameLocator('#injected_iframe_button');
+  await buttonFrame.locator('button').click({ timeout: 15000 });
+
+  // Wait for the main Discrub dialog iframe to appear
+  await page.waitForSelector('#injected_dialog_iframe', { timeout: 15000 });
+  await page.waitForTimeout(2000);
+
+  const mainFrame = page.frameLocator('#injected_dialog_iframe');
+
+  // Dismiss the "Latest News" announcement dialog if it pops up
+  try {
+    const closeButton = mainFrame.locator('button:has-text("Close")');
+    await closeButton.waitFor({ state: 'visible', timeout: 8000 });
+    await closeButton.click();
+    await page.waitForTimeout(1000);
+  } catch {
+    // Dialog did not appear — continue
   }
 
-  await expect(page.locator('text="Quick Export TXT"').first()).toBeVisible({ timeout: 15000 });
+  // Open the Menu and navigate to Direct Messages
+  await mainFrame.locator('button:has-text("Menu")').first().click({ timeout: 10000 });
+  await mainFrame.locator('[role="menuitem"]:has-text("Direct Messages")').click({ timeout: 5000 });
+  await page.waitForTimeout(2000);
 
+  // Click the DM combobox to open the dropdown and wait for DMs to load
+  const dmCombobox = mainFrame.locator('[role="combobox"]').first();
+  await dmCombobox.click({ timeout: 10000 });
+
+  // Wait for listbox with DM options to appear
+  const listbox = mainFrame.locator('[role="listbox"]');
+  await listbox.waitFor({ state: 'visible', timeout: 20000 });
+
+  // Select the first available DM option
+  const firstOption = mainFrame.locator('[role="option"]').first();
+  await firstOption.waitFor({ state: 'visible', timeout: 10000 });
+  await firstOption.click();
+
+  // Close the dropdown
+  await dmCombobox.press('Escape');
+  await page.waitForTimeout(500);
+
+  // Click the Search button (enabled once exactly one DM is selected)
+  const searchButton = mainFrame.locator('button:has-text("Search")').last();
+  await expect(searchButton).toBeEnabled({ timeout: 5000 });
+  await searchButton.click();
+
+  // Wait for message loading to complete (LinearProgress disappears)
+  await page.waitForTimeout(3000);
+  await mainFrame.locator('.MuiLinearProgress-root')
+    .waitFor({ state: 'detached', timeout: 60000 })
+    .catch(() => { /* loading may have already finished */ });
+  await page.waitForTimeout(2000);
+
+  // Verify the Quick Export TXT button is visible (only shown when messages are loaded)
+  const quickExportButton = mainFrame.locator('button:has-text("Quick Export TXT")').first();
+  await expect(quickExportButton).toBeVisible({ timeout: 30000 });
+
+  // Click Quick Export TXT and await the file download
   const [download] = await Promise.all([
-    page.waitForEvent('download', { timeout: 10000 }),
-    page.click('text="Quick Export TXT"')
+    page.waitForEvent('download', { timeout: 30000 }),
+    quickExportButton.click(),
   ]);
 
   const downloadPath = await download.path();
   expect(downloadPath).toBeTruthy();
-  const content = fs.readFileSync(downloadPath, 'utf8');
+  const content = fs.readFileSync(downloadPath!, 'utf8');
   expect(content.length).toBeGreaterThan(0);
-  console.log("Downloaded TXT content snippet:", content.substring(0, 100));
+  console.log('Downloaded TXT content snippet:', content.substring(0, 100));
 
   await context.close();
 });
