@@ -60,6 +60,10 @@ test('Discrub extension - Quick Export TXT end-to-end', async () => {
   const userDataDir = path.resolve(os.tmpdir(), 'test-user-data-dir');
   const context = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
+    recordVideo: {
+      dir: path.resolve(__dirname, '../test-results/videos'),
+      size: { width: 1280, height: 800 },
+    },
     args: [
       `--disable-extensions-except=${extensionPath}`,
       `--load-extension=${extensionPath}`,
